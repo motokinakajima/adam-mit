@@ -12,7 +12,7 @@ from typing import Any, Tuple, List, Optional
 from enum import Enum
 import matplotlib.pyplot as plt
 
-sys.path.insert(1, '../../library')
+sys.path.insert(1, '../../../library')
 import racecar_core
 import racecar_utils as rc_utils
 
@@ -380,12 +380,17 @@ def detect_marker():
     global image
     global ar_markers
     global prev_id
+    dictionary = cv.aruco.getPredefinedDictionary(cv.aruco.DICT_6X6_250)
+    parameters =  cv.aruco.DetectorParameters()
+    detector = cv.aruco.ArucoDetector(dictionary, parameters)
+    
+    markerCorners, markerIds, rejectedCandidates = detector.detectMarkers(image)
     ar_markers = cv.aruco.detectMarkers(image, cv.aruco.Dictionary_get(cv.aruco.DICT_6X6_250),
                                         parameters=cv.aruco.DetectorParameters_create())
-    if ar_markers is not None:
-        if ar_markers[1] is not None:
-            ids = ar_markers[1]
-            corner = ar_markers[0][0][0]
+    if markerIds is not None:
+        if markerCorners is not None:
+            ids = markerIds
+            corner = markerCorners[0]
             # square = abs((corner[0][0]- corner[2][0]) * (corner[0][1]- corner[2][1]))
             square = (abs((corner[2][0] - corner[1][0]) * (corner[0][1] - corner[1][1])
                           - (corner[0][0] - corner[1][0]) * (corner[2][1] - corner[1][1]) +
