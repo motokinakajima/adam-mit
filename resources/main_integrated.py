@@ -380,37 +380,35 @@ def detect_marker():
     global image
     global ar_markers
     global prev_id
+    first_id = 0
     dictionary = cv.aruco.getPredefinedDictionary(cv.aruco.DICT_6X6_250)
     parameters =  cv.aruco.DetectorParameters()
     detector = cv.aruco.ArucoDetector(dictionary, parameters)
     
     markerCorners, markerIds, rejectedCandidates = detector.detectMarkers(image)
-    ar_markers = cv.aruco.detectMarkers(image, cv.aruco.Dictionary_get(cv.aruco.DICT_6X6_250),
-                                        parameters=cv.aruco.DetectorParameters_create())
-    if markerIds is not None:
-        if markerCorners is not None:
-            ids = markerIds
-            corner = markerCorners[0]
-            # square = abs((corner[0][0]- corner[2][0]) * (corner[0][1]- corner[2][1]))
-            square = (abs((corner[2][0] - corner[1][0]) * (corner[0][1] - corner[1][1])
-                          - (corner[0][0] - corner[1][0]) * (corner[2][1] - corner[1][1]) +
-                          abs((corner[0][1] - corner[3][0]) * (corner[2][1] - corner[3][1])
-                              - (corner[2][0] - corner[3][0]) * (corner[0][1] - corner[3][1])))) / 2
+    if markerIds is not None and markerCorners is not None and len(markerCorners) > 0:
+        ids = markerIds
+        corner = markerCorners[0]
+        print(ids)
+        print(corner)
+        
+        # Ensure there are enough corners to calculate the area
+        if len(corner[0]) == 4:
+            square = (abs((corner[0][2][0] - corner[0][1][0]) * (corner[0][0][1] - corner[0][1][1])
+                          - (corner[0][0][0] - corner[0][1][0]) * (corner[0][2][1] - corner[0][1][1]) +
+                          abs((corner[0][0][1] - corner[0][3][0]) * (corner[0][2][1] - corner[0][3][1])
+                              - (corner[0][2][0] - corner[0][3][0]) * (corner[0][0][1] - corner[0][3][1])))) / 2
             print(square)
             if square > 30:
                 print("DETECTED")
                 first_id = ids[0][0]
             else:
-                first_id = prev_id
-                print("AR too samll")
-
+                print("AR too small")
         else:
-            first_id = prev_id
-    else:
-        first_id = prev_id
+            print("Not enough corners detected")
 
     prev_id = first_id
-    if ar_markers is None:
+    if markerIds is None:
         print("NO MARKER")
 
     return first_id
