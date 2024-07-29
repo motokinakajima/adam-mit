@@ -3,10 +3,15 @@ from pid import PIDController
 import os
 from dotenv import load_dotenv
 from pathlib import Path
+import sys
 
 dotenv_path = Path('../.env')
 load_dotenv(dotenv_path=dotenv_path)
 LIBRARY_PASS = os.getenv('LIBRARY_PASS')
+sys.path.insert(1, LIBRARY_PASS)
+import racecar_core
+import racecar_utils as rc_utils
+
 
 def lidar_angle(scan,angle):
     front = 90 - angle
