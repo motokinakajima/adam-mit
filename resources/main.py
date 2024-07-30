@@ -39,20 +39,24 @@ goal_dist = 50
 wall_speed = 0.8
 
 #linefollow
-kp_line = 0.01
-ki_line = 0.005
-kd_line = 0.005
+kp_insec = 0.01
+ki_insec = 0.005
+kd_insec = 0.005
+kp_gap = 0.01
+ki_gap= 0.005
+kd_gap = 0.005
 
 line_speed = 0.8
 
 BLUE_LINE = ((76, 53, 26), (126, 255, 255))
-LINE_CROP_FLOOR = ((180, 0), (240, 320))
+UPPER_CROP = ((180,0),(210,320))
+LOWER_CROP = ((210, 0), (240, 320))
 
 ################
 #PID object
 ################
 wallfollow = WallFollow(kp_angle, ki_angle, kd_angle, kp_dist, ki_dist, kd_dist, wall_speed, goal_dist)
-linefollow = LineFollow(kp_line, ki_line, kd_line, line_speed)
+linefollow = LineFollow(kp_insec, ki_insec, kd_insec, kp_gap, ki_gap, kd_gap, line_speed, BLUE_LINE, UPPER_CROP, LOWER_CROP)
 
 
 def start():
@@ -61,9 +65,6 @@ def start():
 def update():
     mode_dict = {0:"wallfollow",2:"linefollow"}
     image = rc.camera.get_color_image()
-    line_center = None
-    line_area = 0.0
-    line_center,line_area = update_contour(image,BLUE_LINE,LINE_CROP_FLOOR)
     mode, square = detect_marker(image)
 
     if image == None:
@@ -75,7 +76,7 @@ def update():
             speed, angle = wallfollow.update()
 
         elif mode == 2:
-            speed, angle = linefollow.update(line_center)
+            speed, angle = linefollow.update(image)
     
         print(f"mode:{mode_dict[mode]}")
         print(f"marker square{square}")

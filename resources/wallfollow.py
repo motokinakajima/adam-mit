@@ -35,15 +35,15 @@ def lidar_angle(scan,angle,right=True):
 
 
 class WallFollow:
-    def __init__(self, angle_kp, angle_ki ,angle_kd, dist_kp, dist_ki ,dist_kd, speed, goal_dist):
-        self.angle_kp = angle_kp
-        self.angle_ki = angle_ki
-        self.angle_kd = angle_kd
-        self.dist_kp = dist_kp
-        self.dist_ki = dist_ki
-        self.dits_kd = dist_kd
-        self.angle_pid = PIDController(angle_kp, angle_ki, angle_kd)
-        self.dist_pid = PIDController(dist_kp, dist_ki, dist_kd)
+    def __init__(self, kp_angle, ki_angle , kd_angle, kp_dist, ki_dist ,kd_dist, speed, goal_dist):
+        self.kp_angle = kp_angle
+        self.ki_angle = ki_angle
+        self.kd_angle = kd_angle
+        self.kp_dist = kp_dist
+        self.ki_dist = ki_dist
+        self.kd_dist = kd_dist
+        self.angle_pid = PIDController(kp_angle, ki_angle, kd_angle)
+        self.dist_pid = PIDController(kp_dist, ki_dist, kd_dist)
         
         self.angle_pid.start()
         self.dist_pid.start()

@@ -5,10 +5,11 @@ from dotenv import load_dotenv
 from pathlib import Path
 import sys
 
-dotenv_path = Path('../.env')
+dotenv_path = Path('C:\\Users\\eitar\\adam-mit\\.env')
 load_dotenv(dotenv_path=dotenv_path)
 LIBRARY_PASS = os.getenv('LIBRARY_PASS')
 sys.path.insert(1, LIBRARY_PASS)
+print(LIBRARY_PASS)
 import racecar_core
 import racecar_utils as rc_utils
 
@@ -38,26 +39,47 @@ def update_contour(_image,color,crop_floor):
 
 
 class LineFollow:
-    def __init__(self, kp, ki, kd, speed):
-        self.kp = kp
-        self.ki = ki
-        self.kd = kd
+    def __init__(self, kp_insec, ki_insec, kd_insec, kp_gap, ki_gap, kd_gap, speed, color, upper_crop, lower_crop):
+        self.kp_insec = kp_insec
+        self.ki_insec = ki_insec
+        self.kd_insec = kd_insec
 
-        self.pid = PIDController(kp, ki, kd)
-        self.pid.start()
+        self.pid_insec = PIDController(kp_insec, ki_insec, kd_insec)
+        self.pid_gap = PIDController(kp_gap, ki_gap, kd_gap)
+
+        self.pid_insec.start()
+        self.pid_gap.start()
+
+        self.color = color
+        self.upper_crop = upper_crop
+        self.lower_crop = lower_crop
 
         self.speed = speed
     
-    def update(self, center):
+    def update(self, image):
+        middle_crop = (self.upper_crop[0],self.lower_crop[1])
+
+        upper_center, _ = update_contour(image, self.color, self.upper_crop)
+        lower_center, _ = update_contour(image, self.color, self.lower_crop)
+        center, _ = update_contour(image, self.color, middle_crop)
+    
+
+        intersection = lower_center[0] + (upper_center[0] - lower_center[0]) * (lower_center[1] - upper_center[1]) / (lower_center[0] - self.lower_crop[1][0] / 2)
+        insec_gap = intersection - self.lower_crop[1][1]
+
+
         if center is not None:
-            error = rc_utils.remap_range(center[1], 0, 320, -1, 1)
+            insec_error = rc_utils.remap_range(insec_gap, 0, 320, -1, 1)
+            gap_error = rc_utils.remap_range(center[1], 0, 320, -1, 1)
         else:
-            error = 0.0
+            insec_error = 0.0
+            gap_error = 0.0
             print("NO CONTOUR")
 
-        angle = self.pid.update(0,error)
-        
-        # angle = kp * error
+        insec_angle = self.pid_insec.update(0,insec_error)
+        gap_angle = self.pid_gap.update(0,gap_error)
+
+        angle = insec_angle + gap_angle
         angle = np.clip(angle, -1, 1)
 
         return self.speed, angle
