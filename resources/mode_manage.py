@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 import cv2 as cv
 
-sys.path.insert(1, '../../library')
+sys.path.insert(1, '/Users/AT/Desktop/racecar-neo-installer/racecar-student/library')
 import racecar_core
 import racecar_utils as rc_utils
 
@@ -13,15 +13,15 @@ class ModeManager:
     def __init__(self):
         self.mode = 99
 
-    def update(self,image):
-        scan_mode = self.detect_marker(image)
+    def update(self, image):
+        scan_mode, _ = self.detect_marker(image)
 
         if scan_mode is not None:
             self.mode = scan_mode
 
         return self.mode
     
-    def detect_marker(image):
+    def detect_marker(self, image):
         first_id = 99
         square = None
 

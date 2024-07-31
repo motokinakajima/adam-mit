@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 
 
-sys.path.insert(1, '../../library')
+sys.path.insert(1, '/Users/AT/Desktop/racecar-neo-installer/racecar-student/library')
 import racecar_core
 import racecar_utils as rc_utils
 
@@ -57,7 +57,8 @@ class WallFollow:
         return self.speed, angle
     
 
-    def lidar_angle(scan,angle,right=True):
+    def lidar_angle(self,scan,angle,right=True):
+        #self.scan = scan
         if right:
             target = 90
         else:
@@ -65,6 +66,9 @@ class WallFollow:
 
         front = target - angle
         rear = target + angle
+
+        #print(self.scan)
+
 
         forward_point = np.array([scan[front * 2] * np.cos(np.pi * angle / 180), scan[front * 2] * np.sin(np.pi * angle / 180 )])
         rear_point = np.array([scan[rear * 2] * np.cos(-np.pi * angle / 180), scan[rear * 2] * np.sin(-np.pi * angle / 180)])
