@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 
 from wallfollow import *
 from linefollow import *
-from marker import * 
+from mode_manage import * 
 
 
 sys.path.insert(1, '../../library')
@@ -26,6 +26,8 @@ rc = racecar_core.create_racecar()
 #################
 #variables
 #################
+
+mode = 99
 
 #wallfollow
 kp_angle = 0.01
@@ -42,32 +44,38 @@ wall_speed = 0.8
 kp_insec = 0.01
 ki_insec = 0.005
 kd_insec = 0.005
-kp_gap = 0.01
-ki_gap= 0.005
-kd_gap = 0.005
+kp_gap = -0.8
+ki_gap= 0.0
+kd_gap = 0.0
 
 line_speed = 0.8
 
-BLUE_LINE = ((76, 53, 26), (126, 255, 255))
-UPPER_CROP = ((180,0),(210,320))
-LOWER_CROP = ((210, 0), (240, 320))
+BLUE_LINE = ((58, 98, 143), (158, 255, 255))
+GREEN_LINE = ((50, 131, 173), (103, 255, 255))  # The HSV range for the color green
+RED_LINE = ((0, 105, 94), (18, 255,255))
+LINE_PRIORITY = (GREEN_LINE, BLUE_LINE, RED_LINE)
+
+UPPER_CROP = ((360,0),(420, 640))
+LOWER_CROP = ((420, 0), (480, 640))
 
 ################
 #PID object
 ################
-wallfollow = WallFollow(kp_angle, ki_angle, kd_angle, kp_dist, ki_dist, kd_dist, wall_speed, goal_dist)
-linefollow = LineFollow(kp_insec, ki_insec, kd_insec, kp_gap, ki_gap, kd_gap, line_speed, BLUE_LINE, UPPER_CROP, LOWER_CROP)
+wallfollow = WallFollow(rc, kp_angle, ki_angle, kd_angle, kp_dist, ki_dist, kd_dist, wall_speed, goal_dist)
+linefollow = LineFollow(kp_insec, ki_insec, kd_insec, kp_gap, ki_gap, kd_gap, line_speed, LINE_PRIORITY, UPPER_CROP, LOWER_CROP)
 
 
 def start():
     pass
 
 def update():
-    mode_dict = {0:"wallfollow",2:"linefollow"}
+
+    global mode
+    mode_dict = {0:"wallfollow",2:"linefollow", 99:"No AR Marker"}
     image = rc.camera.get_color_image()
     mode, square = detect_marker(image)
 
-    if image == None:
+    if image is None:
         print("no image")
         speed, angle = 0,0
 
@@ -75,20 +83,20 @@ def update():
         if mode == 0:
             speed, angle = wallfollow.update()
 
-        elif mode == 2:
+        elif mode == 99:
             speed, angle = linefollow.update(image)
     
         print(f"mode:{mode_dict[mode]}")
-        print(f"marker square{square}")
+        #print(f"marker square: {square}")
 
     
     print()
     print(f"speed:{speed}")
     print(f"angle:{angle}")
-            
+    print()
     
 
-    speed, angle = wallfollow.update()
+    
     rc.drive.set_speed_angle(speed, angle)
     
 # update slow

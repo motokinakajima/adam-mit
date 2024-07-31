@@ -13,10 +13,12 @@ sys.path.insert(1, LIBRARY_PASS)
 import racecar_core
 import racecar_utils as rc_utils
 
-rc = racecar_core.create_racecar()
+#rc = racecar_core.create_racecar()
 
 
 def detect_marker(image):
+    first_id = 99
+    square = None
 
     dictionary = cv.aruco.getPredefinedDictionary(cv.aruco.DICT_6X6_250)
     parameters =  cv.aruco.DetectorParameters()

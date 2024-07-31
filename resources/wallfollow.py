@@ -12,7 +12,7 @@ sys.path.insert(1, LIBRARY_PASS)
 import racecar_core
 import racecar_utils as rc_utils
 
-rc = racecar_core.create_racecar()
+#rc = racecar_core.create_racecar()
 
 def lidar_angle(scan,angle,right=True):
     if right:
@@ -35,7 +35,8 @@ def lidar_angle(scan,angle,right=True):
 
 
 class WallFollow:
-    def __init__(self, kp_angle, ki_angle , kd_angle, kp_dist, ki_dist ,kd_dist, speed, goal_dist):
+    def __init__(self, rc, kp_angle, ki_angle , kd_angle, kp_dist, ki_dist ,kd_dist, speed, goal_dist):
+        self.rc = rc
         self.kp_angle = kp_angle
         self.ki_angle = ki_angle
         self.kd_angle = kd_angle
@@ -54,7 +55,7 @@ class WallFollow:
 
     def update(self):
 
-        scan = rc.lidar.get_samples()
+        scan = self.rc.lidar.get_samples()
 
         _, forward_wall_dist = rc_utils.get_lidar_closest_point(scan, (-5, 5))
         _, r_min = rc_utils.get_lidar_closest_point(scan, (90, 270))
@@ -72,7 +73,7 @@ class WallFollow:
         angle_a = self.angle_pid.update(0,lidar_angle(scan, 45))
         angle_d = self.dist_pid.update(self.goal_dist,r_min)
 
-        angle_d = np.tnah(angle_d)
+        angle_d = np.tanh(angle_d)
 
         angle = angle_a + angle_d
         angle = np.clip(angle, -1, 1)
