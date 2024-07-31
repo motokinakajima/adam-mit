@@ -45,6 +45,7 @@ class WallFollow:
         
         error_angle = np.nan_to_num(error_angle)
         self.prev = error_angle
+        print(error_angle)
         
         angle_a = self.angle_pid.update(0,error_angle)
         angle_d = self.dist_pid.update(self.goal_dist,r_min)
@@ -109,7 +110,7 @@ class WallFollow2:
         else:
             error = right_error
 
-        angle = self.pid(error)
+        angle = self.pid.update(0,error)
         angle = np.clip(angle, -1, 1)
 
         return self.speed, angle

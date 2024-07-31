@@ -28,14 +28,14 @@ rc = racecar_core.create_racecar()
 #################
 
 #wallfollow
-kp_angle = 0.01
-ki_angle = 0.005
-kd_angle = 0.005
-kp_dist = 0.01
-ki_dist = 0.005
+kp_angle = - 0.003
+ki_angle = 0
+kd_angle = - 0.001
+kp_dist = - 0.01
+ki_dist = 0
 kd_dist = 0.005
 
-goal_dist = 50
+goal_dist = 30
 wall_speed = 0.8
 
 #linefollow
@@ -59,7 +59,8 @@ LOWER_CROP = ((420, 0), (480, 640))
 ################
 #PID object
 ################
-wallfollow = WallFollow(kp_angle, ki_angle, kd_angle, kp_dist, ki_dist, kd_dist, wall_speed, goal_dist)
+#wallfollow = WallFollow2(kp_angle, ki_angle, kd_angle, kp_dist, ki_dist, kd_dist, wall_speed, goal_dist)
+wallfollow = WallFollow2(kp_angle, ki_angle, kd_angle, wall_speed)
 linefollow = LineFollow(kp_insec, ki_insec, kd_insec, kp_gap, ki_gap, kd_gap, line_speed, LINE_PRIORITY, UPPER_CROP, LOWER_CROP)
 
 mode_manager = ModeManager()
@@ -93,6 +94,8 @@ def update():
 
     
     rc.drive.set_speed_angle(speed, angle)
+
+    print(f"mode: {mode_dict[mode]}")
     
 # update slow
 def update_slow():
