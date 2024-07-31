@@ -27,8 +27,6 @@ rc = racecar_core.create_racecar()
 #variables
 #################
 
-mode = 99
-
 #wallfollow
 kp_angle = 0.01
 ki_angle = 0.005
@@ -61,8 +59,10 @@ LOWER_CROP = ((420, 0), (480, 640))
 ################
 #PID object
 ################
-wallfollow = WallFollow(rc, kp_angle, ki_angle, kd_angle, kp_dist, ki_dist, kd_dist, wall_speed, goal_dist)
+wallfollow = WallFollow(kp_angle, ki_angle, kd_angle, kp_dist, ki_dist, kd_dist, wall_speed, goal_dist)
 linefollow = LineFollow(kp_insec, ki_insec, kd_insec, kp_gap, ki_gap, kd_gap, line_speed, LINE_PRIORITY, UPPER_CROP, LOWER_CROP)
+
+mode_manager = ModeManager()
 
 
 def start():
@@ -70,24 +70,19 @@ def start():
 
 def update():
 
-    global mode
     mode_dict = {0:"wallfollow",2:"linefollow", 99:"No AR Marker"}
     image = rc.camera.get_color_image()
-    mode, square = detect_marker(image)
+    scan = rc.lidar.get_samples()
+    mode = mode_manager.update(image)
 
-    if image is None:
-        print("no image")
-        speed, angle = 0,0
+    if mode == 99:
+        speed, angle = wallfollow.update(scan)
 
-    else:
-        if mode == 0:
-            speed, angle = wallfollow.update()
+    elif mode == 0:
+        speed, angle = wallfollow.update(scan)
 
-        elif mode == 99:
-            speed, angle = linefollow.update(image)
-    
-        print(f"mode:{mode_dict[mode]}")
-        #print(f"marker square: {square}")
+    elif mode == 2:
+        speed, angle = linefollow.update(image)
 
     
     print()

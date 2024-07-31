@@ -2,19 +2,12 @@ import numpy as np
 import cv2 as cv
 from pid import PIDController
 import os
-from dotenv import load_dotenv
 from pathlib import Path
 import sys
 
-dotenv_path = Path('/Users/AT/Desktop/ADAM_FINAL/adam-mit/.env')
-load_dotenv(dotenv_path=dotenv_path)
-LIBRARY_PASS = os.getenv('LIBRARY_PASS')
-sys.path.insert(1, LIBRARY_PASS)
-print(LIBRARY_PASS)
+sys.path.insert(1, '../../library')
 import racecar_core
 import racecar_utils as rc_utils
-
-#rc = racecar_core.create_racecar()
 
 
 def update_contour(_image,priority,crop_floor):
