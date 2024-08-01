@@ -50,6 +50,8 @@ class WallFollow:
         angle_a = self.angle_pid.update(0,error_angle)
         angle_d = self.dist_pid.update(self.goal_dist,r_min)
 
+        print(f"r_min : {r_min}")
+
         angle_d = np.tanh(angle_d)
 
         angle = angle_a + angle_d

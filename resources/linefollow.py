@@ -15,7 +15,8 @@ def update_contour(_image,priority,crop_floor):
     contour_area = 0
     MIN_CONTOUR_AREA = 500
     
-    # print(image.shape)
+    print(_image.shape)
+    print(_image)
     # print(CROP_FLOOR)
     if _image is None:
         contour_center = None

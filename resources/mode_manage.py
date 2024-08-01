@@ -16,7 +16,7 @@ class ModeManager:
     def update(self, image):
         scan_mode, _ = self.detect_marker(image)
 
-        if scan_mode is not None:
+        if scan_mode != 99:
             self.mode = scan_mode
 
         return self.mode

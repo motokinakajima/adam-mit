@@ -28,7 +28,7 @@ rc = racecar_core.create_racecar()
 #################
 
 #wallfollow
-kp_angle = - 0.003
+kp_angle = - 0.3
 ki_angle = 0
 kd_angle = - 0.001
 kp_dist = - 0.01
@@ -48,7 +48,8 @@ kd_gap = 0.0
 
 line_speed = 0.8
 
-BLUE_LINE = ((58, 98, 143), (158, 255, 255))
+BLUE_LINE = ((63, 34, 143), (129, 206, 229))
+#BLUE_LINE = ((58, 98, 143), (158, 255, 255))
 GREEN_LINE = ((50, 131, 173), (103, 255, 255))  # The HSV range for the color green
 RED_LINE = ((0, 105, 94), (18, 255,255))
 LINE_PRIORITY = (GREEN_LINE, BLUE_LINE, RED_LINE)
@@ -59,8 +60,8 @@ LOWER_CROP = ((420, 0), (480, 640))
 ################
 #PID object
 ################
-#wallfollow = WallFollow2(kp_angle, ki_angle, kd_angle, kp_dist, ki_dist, kd_dist, wall_speed, goal_dist)
-wallfollow = WallFollow2(kp_angle, ki_angle, kd_angle, wall_speed)
+wallfollow = WallFollow(kp_angle, ki_angle, kd_angle, kp_dist, ki_dist, kd_dist, wall_speed, goal_dist)
+#wallfollow = WallFollow2(kp_angle, ki_angle, kd_angle, wall_speed)
 linefollow = LineFollow(kp_insec, ki_insec, kd_insec, kp_gap, ki_gap, kd_gap, line_speed, LINE_PRIORITY, UPPER_CROP, LOWER_CROP)
 
 mode_manager = ModeManager()
