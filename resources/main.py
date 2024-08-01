@@ -96,6 +96,10 @@ def update():
 
     elif mode == 2:
         speed, angle = linefollow.update(image)
+
+    else:
+        speed = 0
+        angle = 0
     
     #print(detector.get_best_coordinate(image))
 

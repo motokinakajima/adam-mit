@@ -15,8 +15,7 @@ def update_contour(_image,priority,crop_floor):
     contour_area = 0
     MIN_CONTOUR_AREA = 500
     
-    print(_image.shape)
-    print(_image)
+
     # print(CROP_FLOOR)
     if _image is None:
         contour_center = None
@@ -65,7 +64,6 @@ class LineFollow:
         lower_center, _ = update_contour(image, self.priority, self.lower_crop)
         center, _ = update_contour(image, self.priority, middle_crop)
     
-
         #intersection = lower_center[0] + (upper_center[0] - lower_center[0]) * (lower_center[1] - upper_center[1]) / (lower_center[0] - self.lower_crop[1][0] / 2)
         #insec_gap = intersection - self.lower_crop[1][1]
 
