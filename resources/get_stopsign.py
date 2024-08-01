@@ -2,9 +2,10 @@ import numpy as np
 import cv2
 import tensorflow as tf
 import time
+import sys
 
 class EdgeTPUDetector:
-    def __init__(self, model_path, input_size=(160, 160)):
+    def __init__(self, model_path, input_size):
         self.model_path = model_path
         self.input_size = input_size
         self.interpreter = self.load_model()
@@ -45,9 +46,6 @@ class EdgeTPUDetector:
         confidences = []
         class_ids = []
 
-        # Print output tensor shape for debugging
-        print(f"Output tensor shape: {output_tensor.shape}")
-
         num_channels = output_tensor.shape[0]
         num_detections = output_tensor.shape[1]
         num_classes = num_channels - 4  # Exclude the 4 box coordinates
@@ -59,6 +57,8 @@ class EdgeTPUDetector:
             x_center, y_center, box_width, box_height = box_data
             confidence = np.max(class_scores)
             class_id = np.argmax(class_scores)
+            
+            print(f"Detection {i}: Box Data: {box_data}, Class Scores: {class_scores}, Max Confidence: {confidence}")
 
             if confidence > conf_threshold:
                 boxes.append([x_center, y_center, box_width, box_height])
@@ -123,8 +123,34 @@ class EdgeTPUDetector:
         return image
     
     def get_best_coordinate(self, image):
-        image = self.preprocess_image(image)
         output_tensor, detection_time_ms = self.run_inference(image)
-        print(detection_time_ms)
+        print(f'detection time: {detection_time_ms}')
         boxes, confidences, class_ids = self.post_process_output(output_tensor)
         return self.get_most_confident_coordinate(boxes, confidences, class_ids, 3)
+
+if __name__ == "__main__":
+    # Define the image path as a string
+    image_path = "/Users/nakajimamotoki/Downloads/IMG_4454.JPG"
+
+    # Load the image
+    image = cv2.imread(image_path)
+    if image is None:
+        print(f"Error: Could not load image from path: {image_path}")
+        sys.exit(1)
+
+    # Initialize the EdgeTPU detector with the model path
+    model_path = "/Users/nakajimamotoki/Downloads/onesixty_integer_quant.tflite"
+    input_size = (160, 160)
+    detector = EdgeTPUDetector(model_path, input_size)
+
+    # Get the most confident coordinate for the specified class
+    result = detector.get_best_coordinate(image)
+
+    if result is not None:
+        print(f"Most confident detection for class ID 3:")
+        print(f"Center (x, y): ({result['x_center']:.2f}, {result['y_center']:.2f})")
+        print(f"Box width: {result['box_width']:.2f}")
+        print(f"Box height: {result['box_height']:.2f}")
+        print(f"Confidence: {result['confidence']:.2f}")
+    else:
+        print("No detection found for class ID 3.")
