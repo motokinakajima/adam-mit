@@ -15,10 +15,10 @@ import matplotlib.pyplot as plt
 from wallfollow import *
 from linefollow import *
 from mode_manage import * 
-from get_stopsign import *
+#from get_stopsign import *
 
 
-sys.path.insert(1, '../../../../racecar-neo-installer/racecar-student/library')
+sys.path.insert(1, '/Users/AT/Desktop/racecar-neo-installer/racecar-student/library')
 import racecar_core
 import racecar_utils as rc_utils
 
@@ -48,12 +48,20 @@ ki_gap= 0.0
 kd_gap = 0.0
 
 line_speed = 0.8
-
+"""
 BLUE_LINE = ((63, 34, 143), (129, 206, 229))
 #BLUE_LINE = ((58, 98, 143), (158, 255, 255))
 GREEN_LINE = ((50, 131, 173), (103, 255, 255))  # The HSV range for the color green
 RED_LINE = ((0, 105, 94), (18, 255,255))
 LINE_PRIORITY = (GREEN_LINE, BLUE_LINE, RED_LINE)
+"""
+
+ORANGE_LINE = ((11, 64, 143), (16, 255, 255))
+RED_LINE = ((0, 64, 140), (10, 255, 255))
+BLUE_LINE = ((63, 34, 143), (129, 206, 229))
+GREEN_LINE = ((45, 11, 105), (61, 255, 255))
+YELLOW_LINE = ((24, 53, 98), (30, 255, 255))
+LINE_PRIORITY = (GREEN_LINE, RED_LINE, BLUE_LINE, ORANGE_LINE, YELLOW_LINE)
 
 UPPER_CROP = ((360,0),(420, 640))
 LOWER_CROP = ((420, 0), (480, 640))
@@ -67,7 +75,7 @@ linefollow = LineFollow(kp_insec, ki_insec, kd_insec, kp_gap, ki_gap, kd_gap, li
 
 mode_manager = ModeManager()
 
-detector = EdgeTPUDetector('/Users/nakajimamotoki/Downloads/onesixty_integer_quant.tflite', (160,160))
+#detector = EdgeTPUDetector('/Users/nakajimamotoki/Downloads/onesixty_integer_quant.tflite', (160,160))
 
 
 def start():
@@ -81,7 +89,7 @@ def update():
     mode = mode_manager.update(image)
 
     if mode == 99:
-        speed, angle = wallfollow.update(scan)
+        speed, angle = linefollow.update(image)
 
     elif mode == 0:
         speed, angle = wallfollow.update(scan)
@@ -89,7 +97,7 @@ def update():
     elif mode == 2:
         speed, angle = linefollow.update(image)
     
-    print(detector.get_best_coordinate(image))
+    #print(detector.get_best_coordinate(image))
 
     
     print()
