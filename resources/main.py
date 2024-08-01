@@ -15,9 +15,10 @@ import matplotlib.pyplot as plt
 from wallfollow import *
 from linefollow import *
 from mode_manage import * 
+from get_stopsign import *
 
 
-sys.path.insert(1, '/Users/AT/Desktop/racecar-neo-installer/racecar-student/library')
+sys.path.insert(1, '../../../../racecar-neo-installer/racecar-student/library')
 import racecar_core
 import racecar_utils as rc_utils
 
@@ -66,6 +67,8 @@ linefollow = LineFollow(kp_insec, ki_insec, kd_insec, kp_gap, ki_gap, kd_gap, li
 
 mode_manager = ModeManager()
 
+detector = EdgeTPUDetector('/Users/nakajimamotoki/Downloads/onesixty_integer_quant.tflite', (160,160))
+
 
 def start():
     pass
@@ -85,6 +88,8 @@ def update():
 
     elif mode == 2:
         speed, angle = linefollow.update(image)
+    
+    print(detector.get_best_coordinate(image))
 
     
     print()
