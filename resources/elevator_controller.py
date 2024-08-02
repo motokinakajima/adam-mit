@@ -91,13 +91,14 @@ class ArFollow:
         # Return a default value or handle accordingly
 
 class elevatorController:
-    def __init__(self, kp, ki, kd, wait_distance=150, elevator_distance=80, bypass_speed=1.0, ar_follow_speed=0.5, get_onto_speed=1.0):
+    def __init__(self, kp, ki, kd, wait_distance=150, elevator_distance=80, bypass_speed=1.0, ar_follow_speed=0.5, get_onto_speed=1.0, divider_target_x = 400):
         self.phase = 0
         self.wait_distance = wait_distance
         self.elevator_distance = elevator_distance
         self.bypass_speed = bypass_speed
         self.ar_follow_speed = ar_follow_speed
         self.get_onto_speed = get_onto_speed
+        self.target_x = divider_target_x
         self.red_seen = False
         self.detector = ModeManager()
         self.elevator_ar_follow = ArFollow(kp, ki, kd, 32)
@@ -114,7 +115,7 @@ class elevatorController:
         if self.phase == 0:
             if self.detector.get_biggest_marker == 3:
                 speed = self.bypass_speed
-                angle = self.divider_ar_follow.update(image, 400) * -1
+                angle = self.divider_ar_follow.update(image, self.target_x) * -1
             else:
                 self.phase = 1
         elif self.phase == 1:
