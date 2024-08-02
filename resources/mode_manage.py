@@ -186,3 +186,6 @@ class ModeManager:
         except Exception as e:
             print(f"Error calculating center: {e}")
             return None, None
+
+    def get_ar_distance(self, area, a_fit=3611.56, b_fit=17.91):
+        return a_fit / area**0.5 + b_fit
