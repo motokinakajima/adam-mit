@@ -112,8 +112,12 @@ class elevatorController:
         speed = 0
         angle = 0
         _, forward_wall_dist = rc_utils.get_lidar_closest_point(scan, (-5, 5))
+        id3_marker = self.detector.find_marker(image, 3)
+        if id3_marker == None and self.phase == 0:
+            return speed, angle, -1
+
         if self.phase == 0:
-            if self.detector.get_biggest_marker == 3:
+            if self.detector.get_biggest_marker(image) == 3:
                 speed = self.bypass_speed
                 angle = self.divider_ar_follow.update(image, self.target_x) * -1
             else:
@@ -146,5 +150,5 @@ class elevatorController:
             else:
                 self.phase = 4
         elif self.phase == 5:
-            return None
-        return speed, angle
+            return speed, angle, 1
+        return speed, angle, 0
