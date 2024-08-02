@@ -19,7 +19,7 @@ from mode_manage import *
 from elevator_controller import *
 
 
-sys.path.insert(1, '/Users/AT/Desktop/racecar-neo-installer/racecar-student/library')
+sys.path.insert(1, '../../library')
 import racecar_core
 import racecar_utils as rc_utils
 
@@ -30,14 +30,20 @@ rc = racecar_core.create_racecar()
 #################
 
 #wallfollow
-kp_angle = - 0.3
-ki_angle = 0
-kd_angle = - 0.001
-kp_dist = - 0.01
-ki_dist = 0
-kd_dist = 0.005
+kp1 = - 0.3
+ki1 = 0
+kd1 = - 0.001
+kp2 = - 0.01
+ki2 = 0
+kd2 = 0.005
+kp3 = 0.01
+ki3 = 0
+kd3 = 0.001
 
-goal_dist = 30
+normal_ratio = [0.5,0.2,0.3]
+abnormal_ratio = [0,0.8,1]
+
+limit_dist = 30
 wall_speed = 0.8
 
 #linefollow
@@ -76,7 +82,7 @@ LOWER_CROP = ((420, 0), (480, 640))
 ################
 #PID object
 ################
-wallfollow = WallFollow(kp_angle, ki_angle, kd_angle, kp_dist, ki_dist, kd_dist, wall_speed, goal_dist)
+wallfollow = WallFollow2(kp1, ki1, kd1, kp2, ki2, kd2, kp3, ki3, kd3, wall_speed, normal_ratio)
 #wallfollow = WallFollow2(kp_angle, ki_angle, kd_angle, wall_speed)
 linefollow = LineFollow(kp_insec, ki_insec, kd_insec, kp_gap, ki_gap, kd_gap, line_speed, LINE_PRIORITY, UPPER_CROP, LOWER_CROP)
 
@@ -101,10 +107,18 @@ def update():
     image = rc.camera.get_color_image()
     scan = rc.lidar.get_samples()
     mode = mode_manager.update(image)
+    _, forward_wall_dist = rc_utils.get_lidar_closest_point(scan, (-5, 5))
 
     speed, angle, state = elevator_controller.update(image, scan, [BLUE], [RED1, RED2])
 
     print(state)
+
+    if forward_wall_dist < limit_dist:
+        wallfollow.set_ratio(abnormal_ratio)
+        print("abnormal")
+
+    else:
+        wallfollow.set_ratio(normal_ratio)
 
     if state == 0:
         angle = np.clip(angle, -1, 1)

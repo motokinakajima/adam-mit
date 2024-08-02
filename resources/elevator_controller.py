@@ -3,7 +3,7 @@ from mode_manage import *
 from pid import *
 import sys
 
-sys.path.insert(1, '/Users/motokinakajima/racecar-neo-installer/racecar-student/library')
+sys.path.insert(1, '../../library')
 import racecar_core
 import racecar_utils as rc_utils
 

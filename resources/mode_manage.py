@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 import cv2 as cv
 
-sys.path.insert(1, '/Users/nakajimamotoki/racecar-neo-installer/racecar-student/library')
+sys.path.insert(1, '../../library')
 import racecar_core
 import racecar_utils as rc_utils
 

@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 
 
-sys.path.insert(1, '/Users/AT/Desktop/racecar-neo-installer/racecar-student/library')
+sys.path.insert(1, '../../library')
 import racecar_core
 import racecar_utils as rc_utils
 
@@ -83,37 +83,70 @@ class WallFollow:
 
         return angle
 
-
-
 class WallFollow2:
-    def __init__(self, kp, ki , kd, speed):
-        self.kp = kp
-        self.ki = ki
-        self.kd = kd
-        
-        self.pid = PIDController(kp, ki, kd)
+    def __init__(self, kp1, ki1, kd1, kp2, ki2, kd2, kp3, ki3, kd3, speed, ratio):
+        self.kp1 = kp1
+        self.ki1 = ki1
+        self.kd1 = kd1
+        self.kp2 = kp2
+        self.ki2 = ki2
+        self.kd2 = kd2
+        self.kp3 = kp3
+        self.ki3 = ki3
+        self.kd3 = kd3
+                
+        self.pid1 = PIDController(kp1, ki1, kd1)
+        self.pid2 = PIDController(kp2, ki2, kd2)
+        self.pid3 = PIDController(kp3, ki3, kd3)
     
-        self.pid.start()
+        self.pid1.start()
+        self.pid2.start()
+        self.pid3.start()
 
         self.speed = speed
+        self.ratio = ratio
 
-    def update(self, scan):
+    def update(self, scan,):
 
-        left_front_dist = rc_utils.get_lidar_average_distance(scan, -52, 38)
-        right_front_dist = rc_utils.get_lidar_average_distance(scan, 52, 38)
-        left_rear_dist = rc_utils.get_lidar_average_distance(scan, -128, 38)
-        right_rear_dist = rc_utils.get_lidar_average_distance(scan, 128, 38)
-        left_error = left_front_dist - left_rear_dist
-        right_error = right_front_dist - right_rear_dist
-        #error =  right_front_dist - right_rear_dist - left_front_dist + left_rear_dist
+        left_front_dist = rc_utils.get_lidar_average_distance(scan, -45, 10)
+        right_front_dist = rc_utils.get_lidar_average_distance(scan, 45, 10)
+        left_rear_dist = rc_utils.get_lidar_average_distance(scan, -135, 10)
+        right_rear_dist = rc_utils.get_lidar_average_distance(scan, 135, 10)
+        #left_error = left_front_dist - left_rear_dist
+        #right_error = right_front_dist - right_rear_dist
+        error1 =  right_front_dist - right_rear_dist - left_front_dist + left_rear_dist
+        """
         error = 0
         if left_error >= right_error:
             error = left_error * -1
         else:
             error = right_error
+        """
 
-        angle = self.pid.update(0,error)
-        angle = np.clip(angle, -1, 1)
+        angle1 = self.pid1.update(0,error1)
+        angle1 = np.clip(angle1, -1, 1)
+
+        forward_scan = scan[-180:] + scan[:180]
+        index = np.argmax(forward_scan)
+
+        error2 = index - 90
+
+        angle2 = self.pid2.update(0,error2)
+        angle2 = np.clip(angle2, -1, 1)
+
+        r_dist = rc_utils.get_lidar_average_distance(scan, 90, 10)
+        l_dist = rc_utils.get_lidar_average_distance(scan, -90, 10)
+        error3 = r_dist - l_dist
+
+        angle3 = self.pid3.update(0,error3)
+        angle3 = np.clip(angle3,-1,1)
+
+        angle = self.ratio[0] * angle1 + self.ratio[1] * angle2 + self.ratio[2] * angle3
+        angle = np.clip(angle,-1,1)
+        print(angle1,angle2,angle3)
 
         return self.speed, angle
-    
+
+
+    def set_ratio(self, ratio):
+        self.ratio = ratio
