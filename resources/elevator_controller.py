@@ -151,6 +151,12 @@ class elevatorController:
             else:
                 self.phase = 4
         elif self.phase == 4:
+            if forward_wall_dist < 100:
+                speed = 0
+                angle = 0
+            else:
+                self.phase = 5
+        elif self.phase == 5:
             self.prev_state = 1
             return speed, angle, 1
         self.prev_state = 0
