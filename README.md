@@ -46,13 +46,13 @@ def start():
 def update():
     image = rc.camera.get_color_image()
     scan = rc.lidar.get_samples()
-    
+
     #getting speed and angle based on elevator movements
-    speed, angle = elevator_controller.update(image, scan, [BLUE], [RED1, RED2])
-    
+    speed, angle, state = elevator_controller.update(image, scan, [BLUE], [RED1, RED2])
+
     #using this because I have not adjusted my PID yet
     angle = np.clip(angle, -1, 1)
-    
+
     rc.drive.set_speed_angle(speed, angle)
 
 def update_slow():
@@ -62,6 +62,14 @@ if __name__ == "__main__":
     rc.set_start_update(start, update, update_slow)
     rc.go()
 ```
+
+## state
+
+as you can see, the update function returns three data, speed, angle and state. state is a new feature, which indicates the state of the elevator_controller
+
+| -1   | 0     | 1    |
+|------|-------|------|
+| waiting for armarker to be detected | running elevator control | finished elevator control |
 
 ## variables
 
