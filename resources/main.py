@@ -16,6 +16,7 @@ from wallfollow import *
 from linefollow import *
 from mode_manage import *
 #from get_stopsign import *
+from elevator_controller import *
 
 
 sys.path.insert(1, '/Users/AT/Desktop/racecar-neo-installer/racecar-student/library')
@@ -63,6 +64,12 @@ GREEN_LINE = ((45, 11, 105), (61, 255, 255))
 YELLOW_LINE = ((24, 53, 98), (30, 255, 255))
 LINE_PRIORITY = (GREEN_LINE, RED_LINE, BLUE_LINE, ORANGE_LINE, YELLOW_LINE)
 
+
+#ELEVATOR OBJECT
+RED1 = ((0, 100, 100), (18, 255, 255))  # Lower red range
+RED2 = ((160, 100, 100), (180, 255, 255))
+BLUE = ((68, 101, 124), (129, 229, 206))
+
 UPPER_CROP = ((360,0),(420, 640))
 LOWER_CROP = ((420, 0), (480, 640))
 
@@ -73,23 +80,45 @@ wallfollow = WallFollow(kp_angle, ki_angle, kd_angle, kp_dist, ki_dist, kd_dist,
 #wallfollow = WallFollow2(kp_angle, ki_angle, kd_angle, wall_speed)
 linefollow = LineFollow(kp_insec, ki_insec, kd_insec, kp_gap, ki_gap, kd_gap, line_speed, LINE_PRIORITY, UPPER_CROP, LOWER_CROP)
 
+elevator_controller = elevatorController(0.01, 0.0, 0.005)
 mode_manager = ModeManager()
 
 #detector = EdgeTPUDetector('/Users/nakajimamotoki/Downloads/onesixty_integer_quant.tflite', (160,160))
 
+emergencySTOP = False
+prevSTOP = False
+
 
 def start():
-    pass
+    elevator_controller.reset()
+
 
 def update():
 
-    mode_dict = {0:"wallfollow",2:"linefollow", 99:"No AR Marker"}
+    global emergencySTOP
+
+    #mode_dict = {0:"wallfollow",2:"linefollow", 99:"No AR Marker"}
     image = rc.camera.get_color_image()
     scan = rc.lidar.get_samples()
     mode = mode_manager.update(image)
 
+    speed, angle, state = elevator_controller.update(image, scan, [BLUE], [RED1, RED2])
+
+    print(state)
+
+    if state == 0:
+        angle = np.clip(angle, -1, 1)
+        rc.drive.set_speed_angle(speed, angle)
+        return
+    else:
+        mode = 0
+        print("=======cannot detect marker; using default driving mode=========")
+
     if mode == 99:
-        speed, angle = linefollow.update(image)
+        speed, angle = wallfollow.update(scan)
+        print()
+        print("wall following")
+        print()
 
     elif mode == 0:
         speed, angle = wallfollow.update(scan)
@@ -103,17 +132,24 @@ def update():
 
     #print(detector.get_best_coordinate(image))
 
+    
+    angle = np.clip(angle, -1, 1)
+
 
     print()
     print(f"speed:{speed}")
     print(f"angle:{angle}")
     print()
 
+    if emergencySTOP:
+        print("EMERGENCY STOP!!!")
+        speed = 0
+
 
 
     rc.drive.set_speed_angle(speed, angle)
 
-    print(f"mode: {mode_dict[mode]}")
+    #print(f"mode: {mode_dict[mode]}")
 
 # update slow
 def update_slow():

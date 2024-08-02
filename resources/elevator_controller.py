@@ -107,16 +107,17 @@ class elevatorController:
     def reset(self):
         self.phase = 0
         self.red_seen = False
+        self.prev_state = -1
 
     def update(self, image, scan, blueHSV, redHSV):
         speed = 0
         angle = 0
         _, forward_wall_dist = rc_utils.get_lidar_closest_point(scan, (-5, 5))
-        id3_marker = self.detector.find_marker(image, 3)
-        if id3_marker == None and self.phase == 0:
-            return speed, angle, -1
-
+        id3_marker, _ = self.detector.find_marker(image, 3)
         if self.phase == 0:
+            if id3_marker == None and self.prev_state == -1:
+                self.prev_state = -1
+                return speed, angle, -1
             if self.detector.get_biggest_marker(image) == 3:
                 speed = self.bypass_speed
                 angle = self.divider_ar_follow.update(image, self.target_x) * -1
@@ -149,6 +150,8 @@ class elevatorController:
                 angle = self.elevator_ar_follow.update(image) * -1
             else:
                 self.phase = 4
-        elif self.phase == 5:
+        elif self.phase == 4:
+            self.prev_state = 1
             return speed, angle, 1
+        self.prev_state = 0
         return speed, angle, 0

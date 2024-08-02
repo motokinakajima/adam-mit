@@ -122,10 +122,10 @@ class ModeManager:
         markerCorners, markerIds = self.get_all_markers(image)
 
         # Print types and contents for debugging
-        print(f"Type of markerIds: {type(markerIds)}")
-        print(f"Raw markerIds: {markerIds}")
-        print(f"Type of markerCorners: {type(markerCorners)}")
-        print(f"Raw markerCorners: {markerCorners}")
+        #print(f"Type of markerIds: {type(markerIds)}")
+        #print(f"Raw markerIds: {markerIds}")
+        #print(f"Type of markerCorners: {type(markerCorners)}")
+        #print(f"Raw markerCorners: {markerCorners}")
 
         # Convert markerIds from tuple if necessary
         if isinstance(markerIds, tuple):
