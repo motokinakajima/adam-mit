@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 
 from wallfollow import *
 from linefollow import *
-from mode_manage import * 
+from mode_manage import *
 #from get_stopsign import *
 
 
@@ -100,21 +100,21 @@ def update():
     else:
         speed = 0
         angle = 0
-    
+
     #print(detector.get_best_coordinate(image))
 
-    
+
     print()
     print(f"speed:{speed}")
     print(f"angle:{angle}")
     print()
-    
 
-    
+
+
     rc.drive.set_speed_angle(speed, angle)
 
     print(f"mode: {mode_dict[mode]}")
-    
+
 # update slow
 def update_slow():
     pass
@@ -123,6 +123,3 @@ def update_slow():
 if __name__ == "__main__":
     rc.set_start_update(start, update, update_slow)
     rc.go()
-
-
-
