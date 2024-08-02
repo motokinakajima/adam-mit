@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 import sys
 
-sys.path.insert(1, '../../library')
+sys.path.insert(1, '../../../library')
 import racecar_core
 import racecar_utils as rc_utils
 

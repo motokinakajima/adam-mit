@@ -12,7 +12,7 @@ from enum import Enum
 
 
 print(np.__version__)
-sys.path.insert(1, '../../librarye')
+sys.path.insert(1, '../../../librarye')
 import racecar_core
 import racecar_utils as rc_utils
 

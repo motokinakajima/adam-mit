@@ -19,7 +19,7 @@ from mode_manage import *
 from elevator_controller import *
 
 
-sys.path.insert(1, '../../library')
+sys.path.insert(1, '../../../library')
 import racecar_core
 import racecar_utils as rc_utils
 

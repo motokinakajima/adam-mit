@@ -3,7 +3,7 @@ from mode_manage import *
 from pid import *
 import sys
 
-sys.path.insert(1, '../../libraryvim')
+sys.path.insert(1, '../../../libraryvim')
 import racecar_core
 import racecar_utils as rc_utils
 
