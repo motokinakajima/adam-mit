@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-import tensorflow as tf
+import tflite_runtime.interpreter as tflite
 import time
 import sys
 
@@ -11,7 +11,7 @@ class EdgeTPUDetector:
         self.interpreter = self.load_model()
 
     def load_model(self):
-        self.interpreter = tf.lite.Interpreter(model_path=self.model_path)
+        self.interpreter = tflite.Interpreter(model_path=self.model_path,experimental_delegates=[tflite.load_delegate('libedgetpu.so.1')])
         self.interpreter.allocate_tensors()
         return self.interpreter
 
@@ -58,7 +58,7 @@ class EdgeTPUDetector:
             confidence = np.max(class_scores)
             class_id = np.argmax(class_scores)
             
-            print(f"Detection {i}: Box Data: {box_data}, Class Scores: {class_scores}, Max Confidence: {confidence}")
+            #print(f"Detection {i}: Box Data: {box_data}, Class Scores: {class_scores}, Max Confidence: {confidence}")
 
             if confidence > conf_threshold:
                 boxes.append([x_center, y_center, box_width, box_height])
@@ -154,3 +154,4 @@ if __name__ == "__main__":
         print(f"Confidence: {result['confidence']:.2f}")
     else:
         print("No detection found for class ID 3.")
+
