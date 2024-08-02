@@ -61,7 +61,8 @@ class ModeManager:
         
         return (markerCorners, markerIds)
     
-    def get_biggest_marker(self, markerCorners, markerIds):
+    def get_biggest_marker(self, image):
+        markerIds, markerCorners = self.get_all_markers(image)
         biggest_index = None
         max_area = 0  # Initialize max_area to track the largest marker
 
@@ -91,3 +92,12 @@ class ModeManager:
         else:
             print("No markers detected")
             return None
+    
+    def find_marker(self, image, targetId):
+        markerIds, markerCorners = self.get_all_markers(image)
+        if markerIds is not None and markerCorners is not None and len(markerIds) == len(markerCorners):
+            for i, markerId in enumerate(markerIds):
+                if markerId == targetId:  # Assuming markerId is a list containing the ID
+                    return markerId, markerCorners[i]
+        print("Marker not found or mismatched data")
+        return None, None
