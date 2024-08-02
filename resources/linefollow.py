@@ -13,6 +13,7 @@ def update_contour(_image,priority,crop_floor):
     contour_center = None
     contour_area = 0
     MIN_CONTOUR_AREA = 500
+    current_color_index = None
     
 
     # print(CROP_FLOOR)
@@ -28,6 +29,7 @@ def update_contour(_image,priority,crop_floor):
                 contour_area = tmp_contour_area
                 contour_center = rc_utils.get_contour_center(contour_area)
                 #print(f"{i}th loop")
+                current_color_index = i
                 break
             
         else:
@@ -35,7 +37,7 @@ def update_contour(_image,priority,crop_floor):
             contour_center = None
             contour_area = 0
 
-    return contour_center, contour_area
+    return contour_center, contour_area, current_color_index
 
 
 class LineFollow:
@@ -59,7 +61,7 @@ class LineFollow:
     def update(self, image):
         middle_crop = (self.upper_crop[0],self.lower_crop[1])
 
-        upper_center, _ = update_contour(image, self.priority, self.upper_crop)
+        upper_center, _ , self.current_color_index = update_contour(image, self.priority, self.upper_crop)
         lower_center, _ = update_contour(image, self.priority, self.lower_crop)
         center, _ = update_contour(image, self.priority, middle_crop)
     
@@ -97,3 +99,6 @@ class LineFollow:
         angle = np.clip(angle, -1, 1)
 
         return self.speed, angle
+    
+    def get_current_color_index(self):
+        return self.current_color_index
