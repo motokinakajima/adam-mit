@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 import cv2 as cv
 
-sys.path.insert(1, '/Users/AT/Desktop/racecar-neo-installer/racecar-student/library')
+sys.path.insert(1, '/Users/nakajimamotoki/racecar-neo-installer/racecar-student/library')
 import racecar_core
 import racecar_utils as rc_utils
 
@@ -95,9 +95,37 @@ class ModeManager:
     
     def find_marker(self, image, targetId):
         markerIds, markerCorners = self.get_all_markers(image)
-        if markerIds is not None and markerCorners is not None and len(markerIds) == len(markerCorners):
-            for i, markerId in enumerate(markerIds):
-                if markerId == targetId:  # Assuming markerId is a list containing the ID
-                    return markerId, markerCorners[i]
-        print("Marker not found or mismatched data")
+        for i, markerId in enumerate(markerIds):
+            # Handle markerId as array or list
+            if isinstance(markerId, np.ndarray):
+                markerId = markerId.flatten()  # Flatten in case of multi-dimensional array
+            if isinstance(markerId, (list, np.ndarray)):
+                markerId = markerId[0] if len(markerId) > 0 else None
+
+            # Handle the case where markerId is still not an integer
+            if markerId is None:
+                print("markerId is None or empty after extraction")
+                continue
+            
+            if markerId == targetId:
+                return markerId, markerCorners[i]
         return None, None
+
+
+
+
+    
+    def get_center(self, markerCorner):
+        if markerCorner is None or len(markerCorner) != 4:
+            print("Invalid marker corners")
+            return None, None
+        
+        # Extracting the coordinates
+        x_coords = [corner[0][0] for corner in markerCorner]
+        y_coords = [corner[0][1] for corner in markerCorner]
+    
+        # Calculate the center coordinates
+        x_center = sum(x_coords) / len(x_coords)
+        y_center = sum(y_coords) / len(y_coords)
+    
+        return x_center, y_center
