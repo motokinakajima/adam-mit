@@ -5,7 +5,6 @@ import copy
 import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
-import ipywidgets as widgets
 import statistics
 from nptyping import NDArray
 from typing import Any, Tuple, List, Optional
@@ -82,26 +81,33 @@ LOWER_CROP = ((420, 0), (480, 640))
 ################
 #PID object
 ################
-wallfollow = WallFollow2(kp1, ki1, kd1, kp2, ki2, kd2, kp3, ki3, kd3, wall_speed, normal_ratio,abnormal_ratio,limit_dist)
+#wallfollow = WallFollow2(kp1, ki1, kd1, kp2, ki2, kd2, kp3, ki3, kd3, wall_speed, normal_ratio,abnormal_ratio,limit_dist)
+simple_wall_follow = SimpleWallFollow(0.052, 0.0, 0.005)
+wallfollow = WallFollow3(0.006, 0.0, 0.002)
 #wallfollow = WallFollow2(kp_angle, ki_angle, kd_angle, wall_speed))
 linefollow = LineFollow(kp_insec, ki_insec, kd_insec, kp_gap, ki_gap, kd_gap, line_speed, LINE_PRIORITY, UPPER_CROP, LOWER_CROP)
 
-elevator_controller = elevatorController(0.01, 0.0, 0.005)
+elevator_controller = elevatorController(0.008, 0.0, 0.005)
 mode_manager = ModeManager()
 
 #detector = EdgeTPUDetector('/Users/nakajimamotoki/Downloads/onesixty_integer_quant.tflite', (160,160))
 
 emergencySTOP = False
 prevSTOP = False
-
+prev_color_index = None
+last_color_detected = None
+update_last_color = True
+emergencyTurn = 0
+counter = 0
 
 def start():
     elevator_controller.reset()
 
-
 def update():
 
-    global emergencySTOP
+    global emergencySTOP, emergencyTurn, prev_color_index, last_color_detected, update_last_color, counter
+    print()
+    print()
 
     #mode_dict = {0:"wallfollow",2:"linefollow", 99:"No AR Marker"}
     image = rc.camera.get_color_image()
@@ -125,32 +131,69 @@ def update():
         print("=======cannot detect marker; using default driving mode=========")
 
     if mode == 99:
+        speed, angle = simple_wall_follow.update(scan)
+    if mode == 8:
+        speed, angle = linefollow.update(image)
+        speed, angle2 = wallfollow.update(scan)
+        angle = np.clip(angle, -1, 1) * 0.0 + np.clip(angle2, -1, 1) * 1.0
+        """
         speed, angle = linefollow.update(image)
 
         current_index = linefollow.get_current_color_index()
 
-        print(f"forward_dist: {forward_dist}")
-        print(f"left_front_dist: {left_front_dist}")
-        print(f"right_front_dist: {right_front_dist}")
+        #print(f"forward_dist: {forward_dist}")
+        #print(f"left_front_dist: {left_front_dist}")
+        #print(f"right_front_dist: {right_front_dist}")
 
-        print()
-        print("line following")
-        print()
-        print(f"The color index is :{current_index}")
-        if forward_dist < 150:
+        #print()
+        #print("line following")
+        #print()
+        #print(f"The color index is :{current_index}")
+        if current_index != prev_color_index:
+            update_last_color = False
             print("===========emergency rotate!===========")
-            """
-            if current_index is not None:
-                if linefollow.get_current_color_index() % 2 ==0:
-                    angle =  -1.0
+            if current_index is not None and emergencyTurn == 0:
+                update_last_color = False
+                counter = 0
+                if current_index % 2 == 0:
+                    emergencyTurn =  -1.0
                 else:
-                    angle = 1.0
-            """
+                    emergencyTurn = 1.0
+        if forward_dist < 100:
+            print("===========emergency rotate!===========")
+            if current_index is not None and emergencyTurn == 0:
+                update_last_color = False
+                counter = 0
+                if current_index % 2 == 0:
+                    emergencyTurn =  -1.0
+                else:
+                    emergencyTurn = 1.0
+            #elif current_index is None:
+                #speed = -1.0
             if left_front_dist > right_front_dist:
                 angle = -1.0
             else:
                 angle = 1.0
+        contour_width_ratio = linefollow.get_contour_width_ratio()
+        print(f"found color index {current_index} with contour width radio of {contour_width_ratio}")
+        if contour_width_ratio < 0.7 and contour_width_ratio != 0 and current_index != None:
+            if current_index != last_color_detected and counter >= 60:
+                counter = 0
+                emergencyTurn = 0
+                print(f"following new color index {current_index} with contour width radio of {contour_width_ratio}")
+                update_last_color = True
 
+        if emergencyTurn != 0:
+            counter += 1
+            angle = emergencyTurn
+            print(f"emergencyTurn: {emergencyTurn}")
+        else:
+            print("emergencyTurn is off")
+
+        prev_color_index = current_index
+        if update_last_color:
+            last_color_detected = current_index
+            """
 
     elif mode == 0:
         speed, angle = wallfollow.update(scan)
@@ -167,23 +210,26 @@ def update():
 
 
     else:
-        speed = 0
-        angle = 0
+        #speed = 0
+        #angle = 0
+        passs
 
     #print(detector.get_best_coordinate(image))
 
-    
+
     angle = np.clip(angle, -1, 1)
 
 
-    print(f"mode: {mode}")
-    print(f"speed:{speed}")
-    print(f"angle:{angle}")
+    #print(f"mode: {mode}")
+    #print(f"speed:{speed}")
+    #print(f"angle:{angle}")
     print()
-
+    print()
+    """
     if emergencySTOP:
         print("EMERGENCY STOP!!!")
         speed = 0
+    """
 
 
 

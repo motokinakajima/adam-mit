@@ -73,7 +73,8 @@ class LineFollow:
         middle_crop = (self.upper_crop[0],self.lower_crop[1])
 
         upper_center, _ , _, _ = update_contour(image, self.priority, self.upper_crop)
-        lower_center, _ , self.current_color_index, self.contour_width_ratio = update_contour(image, self.priority, self.lower_crop)
+        lower_center, _ , self.current_color_index, _ = update_contour(image, self.priority, self.lower_crop)
+        _, _, _, self.contour_width_ratio = update_contour(image, self.priority, ((360, 0), (480, 640)))
         center, _ , _, _ = update_contour(image, self.priority, middle_crop)
 
         #intersection = lower_center[0] + (upper_center[0] - lower_center[0]) * (lower_center[1] - upper_center[1]) / (lower_center[0] - self.lower_crop[1][0] / 2)
@@ -87,7 +88,7 @@ class LineFollow:
             insec_error = rc_utils.remap_range(insec_gap, 0, 640, -1, 1)
             gap_error = rc_utils.remap_range(center[1], 0, 640, -1, 1)
 
-            print(f"insec error: {insec_error}, gap error: {gap_error}")
+            #print(f"insec error: {insec_error}, gap error: {gap_error}")
         elif center is not None:
             print("NO INTERSECTION")
             insec_error = 0.0
@@ -102,8 +103,8 @@ class LineFollow:
         insec_angle = self.pid_insec.update(0,insec_error)
         gap_angle = self.pid_gap.update(0,gap_error)
 
-        print(f"gap angle: {gap_angle}")
-        print(f"insec angle: {insec_angle}")
+        #print(f"gap angle: {gap_angle}")
+        #print(f"insec angle: {insec_angle}")
 
         angle = insec_angle + gap_angle
         angle = gap_angle
