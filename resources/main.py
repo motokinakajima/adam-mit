@@ -47,10 +47,10 @@ limit_dist = 250
 wall_speed = 0.8
 
 #linefollow
-kp_insec = 0.01
+kp_insec = 0.1
 ki_insec = 0.005
 kd_insec = 0.005
-kp_gap = -0.8
+kp_gap = -1.6
 ki_gap= 0.0
 kd_gap = 0.0
 
@@ -109,6 +109,8 @@ def update():
     mode = mode_manager.update(image)
 
     _, forward_dist = rc_utils.get_lidar_closest_point(scan, (-15, 15))
+    left_front_dist = rc_utils.get_lidar_average_distance(scan, -15, 5)
+    right_front_dist = rc_utils.get_lidar_average_distance(scan, 15, 5)
 
     speed, angle, state = elevator_controller.update(image, scan, [BLUE], [RED1, RED2])
 
@@ -127,17 +129,28 @@ def update():
 
         current_index = linefollow.get_current_color_index()
 
+        print(f"forward_dist: {forward_dist}")
+        print(f"left_front_dist: {left_front_dist}")
+        print(f"right_front_dist: {right_front_dist}")
+
         print()
         print("line following")
         print()
         print(f"The color index is :{current_index}")
-        if forward_dist < 70:
+        if forward_dist < 150:
             print("===========emergency rotate!===========")
+            """
             if current_index is not None:
                 if linefollow.get_current_color_index() % 2 ==0:
                     angle =  -1.0
                 else:
                     angle = 1.0
+            """
+            if left_front_dist > right_front_dist:
+                angle = -1.0
+            else:
+                angle = 1.0
+
 
     elif mode == 0:
         speed, angle = wallfollow.update(scan)
