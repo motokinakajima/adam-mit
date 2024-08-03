@@ -63,12 +63,12 @@ RED_LINE = ((0, 105, 94), (18, 255,255))
 LINE_PRIORITY = (GREEN_LINE, BLUE_LINE, RED_LINE)
 """
 
-ORANGE_LINE = ((11, 64, 143), (16, 255, 255))
-RED_LINE = ((0, 64, 140), (10, 255, 255))
-BLUE_LINE = ((63, 34, 143), (129, 206, 229))
-GREEN_LINE = ((45, 11, 105), (61, 255, 255))
-YELLOW_LINE = ((24, 53, 98), (30, 255, 255))
-LINE_PRIORITY = (GREEN_LINE, RED_LINE, BLUE_LINE, ORANGE_LINE, YELLOW_LINE)
+ORANGE_LINE = ((11, 116, 236), (21, 255, 255))
+RED_LINE = ((0, 64, 0), (8, 255,255))
+BLUE_LINE = ((76, 116, 161), (121, 255, 255))
+GREEN_LINE = ((47, 83, 0), (61, 255, 255))
+YELLOW_LINE = ((24, 79, 0), (32, 255, 255))
+LINE_PRIORITY = (YELLOW_LINE, GREEN_LINE, BLUE_LINE, RED_LINE, ORANGE_LINE)
 
 
 #ELEVATOR OBJECT
@@ -108,6 +108,8 @@ def update():
     scan = rc.lidar.get_samples()
     mode = mode_manager.update(image)
 
+    _, forward_dist = rc_utils.get_lidar_closest_point(scan, (-15, 15))
+
     speed, angle, state = elevator_controller.update(image, scan, [BLUE], [RED1, RED2])
 
     print(state)
@@ -117,14 +119,25 @@ def update():
         rc.drive.set_speed_angle(speed, angle)
         return
     else:
-        mode = 0
+        mode = 99
         print("=======cannot detect marker; using default driving mode=========")
 
     if mode == 99:
-        speed, angle = wallfollow.update(scan)
+        speed, angle = linefollow.update(image)
+
+        current_index = linefollow.get_current_color_index()
+
         print()
-        print("wall following")
+        print("line following")
         print()
+        print(f"The color index is :{current_index}")
+        if forward_dist < 70:
+            print("===========emergency rotate!===========")
+            if current_index is not None:
+                if linefollow.get_current_color_index() % 2 ==0:
+                    angle =  -1.0
+                else:
+                    angle = 1.0
 
     elif mode == 0:
         speed, angle = wallfollow.update(scan)
@@ -132,7 +145,7 @@ def update():
     elif mode == 2:
         speed, angle = linefollow.update(image)
 
-    elif mode == 7 and mode_manager.get_ar_distance() < 80:
+    elif mode == 7 and mode_manager.get_ar_distance() < 40:
         angle += 0.3
         angle = np.clip(angle,-1,1)
 
@@ -150,7 +163,7 @@ def update():
     angle = np.clip(angle, -1, 1)
 
 
-    print()
+    print(f"mode: {mode}")
     print(f"speed:{speed}")
     print(f"angle:{angle}")
     print()

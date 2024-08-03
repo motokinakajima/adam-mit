@@ -20,6 +20,7 @@ def update_contour(_image,priority,crop_floor):
     if _image is None:
         contour_center = None
         contour_area = 0
+        current_color_index = None
     else:  
         _image = rc_utils.crop(_image, crop_floor[0], crop_floor[1])
         for i,color in enumerate(priority):
@@ -36,6 +37,8 @@ def update_contour(_image,priority,crop_floor):
             # if any color's contours is None, variables become init value
             contour_center = None
             contour_area = 0
+            current_color_index = None
+
 
     return contour_center, contour_area, current_color_index
 
@@ -61,9 +64,9 @@ class LineFollow:
     def update(self, image):
         middle_crop = (self.upper_crop[0],self.lower_crop[1])
 
-        upper_center, _ , self.current_color_index = update_contour(image, self.priority, self.upper_crop)
-        lower_center, _ = update_contour(image, self.priority, self.lower_crop)
-        center, _ = update_contour(image, self.priority, middle_crop)
+        upper_center, _ , _ = update_contour(image, self.priority, self.upper_crop)
+        lower_center, _ , self.current_color_index = update_contour(image, self.priority, self.lower_crop)
+        center, _ , _ = update_contour(image, self.priority, middle_crop)
     
         #intersection = lower_center[0] + (upper_center[0] - lower_center[0]) * (lower_center[1] - upper_center[1]) / (lower_center[0] - self.lower_crop[1][0] / 2)
         #insec_gap = intersection - self.lower_crop[1][1]
